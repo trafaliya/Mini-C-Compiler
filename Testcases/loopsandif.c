@@ -14,7 +14,7 @@ int main()
 
         for (i=0;i<10;i++                      // invalid for loop
         {
-
+		printf("%d \n",i);
         }
 
         while (i<20)                           // valid nested while loops
