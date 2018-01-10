@@ -6,9 +6,9 @@
 int main()
 {
 	char a;             //valid char assignment
-        int 5xyz;           //invalid identifier
-	char a[100];
-
+	char a[100];        //valid char assignment
+        
+	int 5xyz;           //invalid identifier
 	int x=10;           //valid int assignment      
         x=2*q;              //invalid assignment
   
