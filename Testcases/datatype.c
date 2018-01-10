@@ -13,7 +13,7 @@ int main()
         x=2*q;              //invalid assignment
   
         float z=30.0;       //valid float assignment
-        float y=25.0;
+        float @y=25.0;      //invalid float assignment
 
         z=x+y;              //valid statement
 	return 0;
