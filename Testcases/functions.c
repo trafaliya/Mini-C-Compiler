@@ -6,10 +6,6 @@
 void printpattern()                                //correct function declaration
 {
 	printf("*    \n");
-	printf("**    \n");
-	printf("***    \n");
-	printf("****    \n");
-	printf("*****    \n");
 
 }
 
