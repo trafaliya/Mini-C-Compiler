@@ -21,11 +21,9 @@ struct symboltable* item;
 int hashCode(char token[100]) {
    int i,x=0,j=strlen(token);
    x=0;
-   if (j>4)
-   		j=4;
    for(i=j;i>=0;i--)
    {
-   	x=x+token[i]*pow(10,j-i);
+   	x=x*10+token[i];
    	x%=10000;
    }
    
@@ -56,7 +54,9 @@ void insert(char a[100],char b[100]) {
    char token[100];
    strcpy(token,item->token);
    int hashIndex = hashCode(token);
-
+   if (stable[hashIndex]!=NULL)
+   	if (strcmp(stable[hashIndex]->token,a)==0)
+    	return;
    while(stable[hashIndex] != NULL && stable[hashIndex]->token != "-1") {
       
       ++hashIndex;
@@ -75,7 +75,9 @@ void cinsert(char a[100],char b[100]) {
    char token[100];
    strcpy(token,item->token);
    int hashIndex = hashCode(token);
-
+   if (ctable[hashIndex]!=NULL)
+   	if (strcmp(ctable[hashIndex]->token,a)==0)
+    	return;
    while(ctable[hashIndex] != NULL && ctable[hashIndex]->token != "-1") {
       
       ++hashIndex;
@@ -140,7 +142,9 @@ digit[0-9]
 
 "\\n" {insert(yytext,"New line");}
 
-"//"|"/*"|"*/" {insert(yytext,"Commment");}
+\/\/.*"\n" {insert(yytext,"Single line Commment");}
+
+"/*"([^*]|\*+[^*/])*\*+"/" {insert(yytext,"Multi Line Commment");}
 
 "@"|"$" {insert(yytext,"Lexical error");}
 
