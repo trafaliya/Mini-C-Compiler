@@ -2,11 +2,11 @@
 
 int main()
 {
-
-//This is a commment                             Valid comment
+5abc;
+//This is a comment                             Valid comment
 
 /* 
-This is also a comment                           Valid comment
+/*This is also a comment*/                          Valid comment
 */
 
                                                //Invalid comment
