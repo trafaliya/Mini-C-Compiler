@@ -2,7 +2,6 @@
 
 int main()
 {
-5abc;
 //This is a comment                             Valid comment
 
 /* 
