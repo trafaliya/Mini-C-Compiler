@@ -106,12 +106,19 @@ struct symboltable* delete(struct symboltable* item) {
    return NULL;        
 }
 
+void cdisplay1(char a[1000],char b[1000])
+{
+	
+	printf("%s - %s\n",a,b);
+}
+
 int i=0;
 
 %}
 
 letter [a-zA-Z]  
 digit[0-9]  
+notletter [^a-zA-Z]
 
 %%  
 {digit}+("E"("+"|"-")?{digit}+)? {cinsert(yytext,"Real Number");}
@@ -121,32 +128,31 @@ digit[0-9]
 "\""(.*)"\"" {cinsert(yytext,"Character constant");}
 
 
-"#include <"{letter}*".h>"|"#include<"{letter}*".h>" {insert(yytext,"Include statement"); }
+"#include <"{letter}*".h>"|"#include<"{letter}*".h>" {cdisplay1(yytext,"Include statement"); }
 
-"auto"|"break"|"case"|"char"|"const"|"continue"|"default"|"do"|"double"|"else"|"enum"|"extern"|"float"|"for"|"goto"|"if"|"int"|"long"|"register"|"return"|"short"|"signed"|"sizeof"|"static"|"struct"|"switch"|"typedef"|"union"|"unsigned"|"void"|"volatile"|"while" {insert(yytext,"Keyword");}
+"auto"|"break"|"case"|"char"|"const"|"continue"|"default"|"do"|"double"|"else"|"enum"|"extern"|"float"|"for"|"goto"|"if"|"int"|"long"|"register"|"return"|"short"|"signed"|"sizeof"|"static"|"struct"|"switch"|"typedef"|"union"|"unsigned"|"void"|"volatile"|"while" {cdisplay1(yytext,"Keyword");}
 
 ({letter}|"_")({letter}|{digit})* {insert(yytext,"Identifier");}
 
+"&&"|"<"|">"|"<="|">="|"="|"+"|"-"|"?"|"*"|"/"|"%"|"&"|"||" {cdisplay1(yytext,"Operators");}
 
-"&&"|"<"|">"|"<="|">="|"="|"+"|"-"|"?"|"*"|"/"|"%"|"&"|"||" {insert(yytext,"Operators");}
+"{"|"["|"(" {cdisplay1(yytext,"Opening bracket"); }
 
-"{"|"["|"(" {insert(yytext,"Opening bracket"); }
+"}"|"]"|")" {cdisplay1(yytext,"Closing bracket");}
 
-"}"|"]"|")" {insert(yytext,"Closing bracket");}
+"#"|"'"|"."|"\""|"," {cdisplay1(yytext,"Special characters");}
 
-"#"|"'"|"."|"\""|"," {insert(yytext,"Special characters");}
+"\;" {cdisplay1(yytext,"Delimiter");}
 
-"\;" {insert(yytext,"Delimiter");}
+"%d"|"%s"|"%c"|"%f"|"%e" {cdisplay1(yytext,"Format Specifier");}
 
-"%d"|"%s"|"%c"|"%f"|"%e" {insert(yytext,"Format Specifier");}
+"\\n" {cdisplay1(yytext,"New line");}
 
-"\\n" {insert(yytext,"New line");}
+\/\/.*"\n" {cdisplay1(yytext,"Single line Comment");}
 
-\/\/.*"\n" {insert(yytext,"Single line Commment");}
+"/*"([^*]|\*+[^*/]*)*\*+"/" {cdisplay1(yytext,"Multi Line Commment");}
 
-"/*"([^*]|\*+[^*/])*\*+"/" {insert(yytext,"Multi Line Commment");}
-
-"@"|"$" {insert(yytext,"Lexical error");}
+"@"|"$" {cdisplay1(yytext,"Lexical error");}
 
 " "|"\t"|"\n"
 
