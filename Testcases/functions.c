@@ -10,7 +10,7 @@ void printpattern()                                //correct function declaratio
 }
 
 
-int ret10[]                                      //incorrect function declaration
+int ret10()                                     //correct function declaration
 {
 	return 10;
 }
@@ -28,9 +28,5 @@ int main()
 {
 	int i,j;
         printpattern();                           //correct function call
-        
-	i=ret10{};                                //incorrect function call
-
-	checkg10(i);                              //correct function call
 
 }
