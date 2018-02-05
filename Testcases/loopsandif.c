@@ -12,7 +12,7 @@ int main()
 		printf("%d \n",i);
 	}
 
-        for [i=0;i<10;i++]                      // invalid for loop
+        for (i=0;i<10;i++)                      // valid for loop
         {
 		printf("%d \n",i);
         }
@@ -25,7 +25,7 @@ int main()
 			j++;
 		}
 	}
-	while {x<9}                              // invalid while statement
+	while (x<9)                              // valid while statement
 		x++;
 
         if (i<20)                              // valid if-else statements
@@ -40,7 +40,7 @@ int main()
 		printf("Equality \n");
 
 
-	if [i<20]                                 // invalid if-else statements
+	if (i<20)                                 // valid if-else statements
 		printf("Nothing happens \n");
 
 }
