@@ -25,7 +25,7 @@ int main()
 			j++;
 		}
 	}
-	while {x<9                              // no closing brackets
+	while (x<9                              // no closing brackets
 		x++;
 
         if (i<20)                              // valid if-else statements
