@@ -5,7 +5,7 @@
 #include <math.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include "y.tab.h"
+
 struct symboltable {
    char token[100];
    char type[100];  
@@ -47,7 +47,7 @@ struct symboltable *search(char token[100]) {
 
 void insert(char a[100],char b[100]) {
 
-   printf("%s - %s\n",a,b);
+   
    struct symboltable *item = (struct symboltable*) malloc(sizeof(struct symboltable));
    strcpy(item->type,b);  
    strcpy(item->token,a);
@@ -68,7 +68,7 @@ void insert(char a[100],char b[100]) {
 
 void cinsert(char a[100],char b[100]) {
 
-   printf("%s - %s\n",a,b);
+   
    struct symboltable *item = (struct symboltable*) malloc(sizeof(struct symboltable));
    strcpy(item->type,b);  
    strcpy(item->token,a);
@@ -106,11 +106,7 @@ struct symboltable* delete(struct symboltable* item) {
    return NULL;        
 }
 
-void cdisplay1(char a[1000],char b[1000])
-{
-	
-	printf("%s - %s\n",a,b);
-}
+
 
 int i=0,line=1;
 
@@ -170,7 +166,7 @@ notletter [^a-zA-Z]
 
 [1-9][0-9]*|0 {cinsert(yytext, "Integer constant"); return NUM;}
 
-. {printf("yyy a%sb xxx \n",yytext); return yytext[0];}
+. {return yytext[0];}
 
 
 %%  

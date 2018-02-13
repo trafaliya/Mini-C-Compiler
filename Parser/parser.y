@@ -5,10 +5,7 @@
     #include<stdlib.h>
     #include<ctype.h>
     int flag=0;
-    extern FILE *yyin;
-    extern int yylineno;
-    extern char *yytext;
-    extern int line;
+   
    
 %}
  
@@ -104,9 +101,15 @@ expr1:      expr
 assignment: ID op3 expr 
             ;
  
-declaration:type ID 
-            | type assignment
+declaration:type dec1
             ;
+
+dec1:       ID
+            |assignment
+	    |ID',' dec1
+	    |assignment',' dec1
+            ;
+ 
  
 stmtblock:  '{' stmtlist '}'
             ;
@@ -116,7 +119,10 @@ stmtlist:   stmt stmtlist
             ;
  
 argument:  expr
-            |expr',' argument
+           |expr',' argument
+	   | BAND ID
+           | BAND ID',' argument
+           ;
  
 parameter:  type ID
             ;
@@ -151,21 +157,23 @@ elsestmt:   ELSE ifstmt
             |  
             ;
 %%
-
+#include "lex.yy.c"
 void yyerror(char *s) {
     flag=1;
-    printf(" line %d: %s at: %s \n",line, s,yytext);
+    printf("Line %d: %s before: %s \n",line, s,yytext);
 }
 
 int main()
 {
 
-    yyin=fopen("abc.c","r");
+    yyin=fopen("test-1.c","r");
 
     yyparse();
     if(!flag){
         printf("Parsing Successful\n");
     }
+    else
+        printf("Parsing Unsuccessful \n");
  
 }
 
