@@ -166,7 +166,7 @@ void yyerror(char *s) {
 int main()
 {
 
-    yyin=fopen("test-1.c","r");
+    yyin=fopen("functions.c","r");
 
     yyparse();
     if(!flag){
@@ -174,6 +174,8 @@ int main()
     }
     else
         printf("Parsing Unsuccessful \n");
+    display();
+    cdisplay();
  
 }
 
