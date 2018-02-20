@@ -6,9 +6,12 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+char ty[100];
+
 struct symboltable {
    char token[100];
-   char type[100];  
+   char type[100]; 
+   char ty[100]; 
 };
 
 struct symboltable* stable[10000]; 
@@ -45,13 +48,16 @@ struct symboltable *search(char token[100]) {
    return NULL;        
 }
 
-void insert(char a[100],char b[100]) {
+void insert(char a[100],char b[100],char c[100]) {
 
    
    struct symboltable *item = (struct symboltable*) malloc(sizeof(struct symboltable));
    strcpy(item->type,b);  
    strcpy(item->token,a);
+   strcpy(item->ty,c);
    char token[100];
+   if (strcmp(a,"printf")==0 || strcmp(a,"scanf")==0)
+       strcpy(item->ty,"VOID");
    strcpy(token,item->token);
    int hashIndex = hashCode(token);
    if (stable[hashIndex]!=NULL)
@@ -106,6 +112,28 @@ struct symboltable* delete(struct symboltable* item) {
    return NULL;        
 }
 
+void display() {
+   int i = 0;
+	
+   for(i = 0; i<10000; i++) {
+	
+      if(stable[i] != NULL && stable[i]->token!="-1")
+         printf("%s - %s - %s\n",stable[i]->token,stable[i]->type,stable[i]->ty);
+
+   }
+}
+
+void cdisplay() {
+   int i = 0;
+	
+   for(i = 0; i<10000; i++) {
+	
+      if(ctable[i] != NULL && ctable[i]->token!="-1")
+         printf("%s - %s\n",ctable[i]->token,ctable[i]->type);
+
+   }
+}
+
 
 
 int i=0,line=1;
@@ -128,13 +156,13 @@ notletter [^a-zA-Z]
 
 "#include <"{letter}*".h>"|"#include<"{letter}*".h>" {return INCLUDE; }
 
-"char" {return CHAR;}
+"char" {strcpy(ty,"CHAR"); return CHAR; }
 "else" {return ELSE;}
 "for" {return FOR;}
 "if" {return IF;}
-"int" {return INT;}
+"int" {strcpy(ty,"INT"); return INT;}
 "return" {return RETURN;}
-"void" {return VOID;}
+"void" {strcpy(ty,"VOID"); return VOID;}
 "while"  {return WHILE;}
 
 "&&" {return AND;}
@@ -160,7 +188,7 @@ notletter [^a-zA-Z]
 "++" {return PLPL;}
 "--" {return MIMI;}
 
-({letter}|"_")({letter}|{digit}|"_")* {insert(yytext,"Identifier"); return ID;}
+({letter}|"_")({letter}|{digit}|"_")* {insert(yytext,"Identifier",ty); return ID;}
 
 \".*\"|\'.*\' {cinsert(yytext,"Character constant"); return STRING;}
 
@@ -170,4 +198,3 @@ notletter [^a-zA-Z]
 
 
 %%  
-
