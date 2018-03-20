@@ -7,6 +7,8 @@
     int flag=0,flag1=0,flag2=1,arg=0;
     char futy[100];
     char ty[100];
+    int fflag=0;
+    int size=-999;
     int scope=0,count=0;
     void delete(int s);
     char prevcall[1000];
@@ -21,9 +23,11 @@
     int gtype(char a[100]);
     int yylex();
     int line=1;
+    char lastf[100];
    
 %}
 
+%expect 2
 %union
 {
 	int num;
@@ -37,7 +41,7 @@
 %token <string> LITERAL
 %token <num> NUM
 %type <string> type
-%type <num> expr
+%type <num> expr expr1
 %token FOR WHILE IF ELSE
 %token INT CHAR VOID INCLUDE RETURN
 %right PLPL MIMI  
@@ -53,8 +57,11 @@ first:      INCLUDE first
             | INCLUDE states 
             ;
 
-states:     stmt states
-            | stmt
+states:     stmt states    
+	    |stmt
+	    |stmtblock
+	    |stmtblock states 
+	    
             ;
  
 type:       INT {$$="INT";}
@@ -65,12 +72,12 @@ type:       INT {$$="INT";}
 stmt:       ';'
             |expr';'
             |RETURN';' {}// if (strcmp(futy,"VOID")!=0) printf("The return type of function is not VOID \n"); }
-            |RETURN expr';' { if (flag2!=1) printf("Line %d : The return expression is invalid \n",line); }
+            |RETURN expr';' { if (flag2!=1) printf("Line %d : The return expression is invalid \n",line); 
+				else if(flag2==1 && strcmp(futy,"VOID")==0) printf("Line %d : Return type dosen't match function type %s\n",line,futy); }
             |ifstmt
             |whileloop
             |forloop
             |funcdef
-            |funccall';'
             |assignment';' 
             |declaration';'
             ;
@@ -107,6 +114,7 @@ expr:       expr OR expr {if($1==1 && $3==1)$$=1; else $$=-1;}
 			x=x/10;
 			z++;
                    }
+                   size=$1;
                    char *a=(char *)malloc(sizeof(char)*z);
                    while (y>0)
 		   {
@@ -123,9 +131,9 @@ expr:       expr OR expr {if($1==1 && $3==1)$$=1; else $$=-1;}
             | STRING {$$=-1;flag1=0; cinsert($1,"CHAR constant");flag2=1;}
             ;
  
-expr1:      expr
-            | assignment
-            |  
+expr1:      expr {$$=$1;}
+            | assignment {$$=-1;}
+            |  {$$=1;}
             ;
             
 assignment: ID EQ expr {if (!search($1)) printf("Line %d : %s not declared \n",line,$1); if ($3!=1) printf ("Line %d : Expression is not of type INT \n",line);}
@@ -173,33 +181,71 @@ dec1:       ID        {
 				printf("Line %d : Redeclaration of identifier \n",line);
                        else
 		                insert($1,"Identifier",0,0,"",scope,"",0,0,0);}
-	    |ID'['NUM']'       {
+            |ID'['expr']' EQ expr      {
 		        if (cdup($1))
 				printf("Line %d : Redeclaration of identifier \n",line);
-                        else
-		                insert($1,"Identifier",0,0,"",scope,"",0,$3,1);
-                        if ($3<1)
-				printf("Line %d : Array size is less than 1 \n",line);}           
+                        if ($3!=1)
+				printf("Line %d : Expression is not INT \n",line);
+                        if (size!=-999)
+			{
+				if (size<1)
+					printf("Line %d : Array size is less than 1 \n",line);
+				else
+					insert($1,"Identifier",0,0,"",scope,"",0,size,1);
+				size=-999;} } 
+            |ID'['expr']' EQ expr',' dec1     {
+		        if (cdup($1))
+				printf("Line %d : Redeclaration of identifier \n",line);
+                        if ($3!=1)
+				printf("Line %d : Expression is not INT \n",line);
+                        if (size!=-999)
+			{
+				if (size<1)
+					printf("Line %d : Array size is less than 1 \n",line);
+				else
+					insert($1,"Identifier",0,0,"",scope,"",0,size,1);
+				size=-999;} } 
+            |ID'['expr']'       {
+		        if (cdup($1))
+				printf("Line %d : Redeclaration of identifier \n",line);
+                        if ($3!=1)
+				printf("Line %d : Expression is not INT \n",line);
+                        if (size!=-999)
+			{
+				if (size<1)
+					printf("Line %d : Array size is less than 1 \n",line);
+				else
+					insert($1,"Identifier",0,0,"",scope,"",0,size,1);
+				size=-999;} }      
             |assignment1
 	    |ID',' dec1 {if (cdup($1))
 				printf("Line %d : Redeclaration of identifier \n",line);
                        else
 		                insert($1,"Identifier",0,0,"",scope,"",0,0,0);}
-	    |ID'['NUM']'',' dec1 {if (cdup($1))
+
+            |ID'['expr']'',' dec1 {
+		        if (cdup($1))
 				printf("Line %d : Redeclaration of identifier \n",line);
-                       else
-		                insert($1,"Identifier",0,0,"",scope,"",0,$3,1);
-		       if ($3<1)
-				printf("Line %d : Array size is less than 1 \n",line);}  
+                        if ($3!=1)
+				printf("Line %d : Expression is not INT \n",line);
+                        if (size!=-999)
+			{
+				if (size<1)
+					printf("Line %d : Array size is less than 1 \n",line);
+				else
+					insert($1,"Identifier",0,0,"",scope,"",0,size,1);
+				size=-999;} }  
 	    |assignment1',' dec1
             ;
  
  
-stmtblock:  '{'{scope++; } stmtlist '}'{scope--; delete(scope+1);}
+stmtblock:  '{'{scope++; } stmtlist '}'{scope--; delete(scope+1); }
             ;
  
 stmtlist:   stmt stmtlist
             | stmt
+	    |stmtblock
+	    |stmtblock stmtlist
             ;
  
 argumentlist:	argument',' {arg++;} argumentlist
@@ -254,26 +300,28 @@ funccall:   ID'('')'{if (!search($1))  printf("Line %d : %s not declared \n",lin
                               }
             ;
  
-funcdef:    type ID'('paramlist')'{ strcpy(ty,$1); strcpy(futy,$1); if (cdup($2)) printf("Line %d : Redeclaration of function \n",line); else insert($2,"Function",0,1,para,scope,pty,count,0,0);  count=0;int i;memset(para, 0, sizeof para);} stmtblock
+funcdef:    type ID'('paramlist')'{ fflag=1; strcpy(lastf,$2); strcpy(ty,$1); strcpy(futy,$1); if (cdup($2)) printf("Line %d : Redeclaration of identifer \n",line); else insert($2,"Function",0,1,para,scope,pty,count,0,0);  count=0;int i;memset(para, 0, sizeof para); } stmtblock
             ;
  
 whileloop:  WHILE '(' expr ')' stmt {if($3!=1)printf("Line %d : While expression is not of type INT \n",line); }
             | WHILE '(' expr ')' stmtblock {if($3!=1)printf("Line %d : While expression is not of type INT \n",line); }
             ;
  
-forloop:    FOR '(' expr1 ';' expr1 ';' expr1 ')' stmt
-            | FOR '(' expr1 ';' expr1 ';' expr1 ')' stmtblock
+forloop:    FOR '(' expr1 ';' expr1 ';' expr1 ')' {if($5!=1)printf("Line %d : For expression is not of type INT \n",line-1); }stmt 
+            | FOR '(' expr1 ';' expr1 ';' expr1 ')' {if($5!=1)printf("Line %d : For expression is not of type INT \n",line-1); }stmtblock 
             ;
  
 ifstmt:     IF '(' expr ')' stmtblock elsestmt {if($3!=1)printf("Line %d : If expression is not of type INT \n",line); }
             | IF '(' expr ')' stmt elsestmt {if($3!=1)printf("Line %d : If expression is not of type INT \n",line); }
             ;
 
-elsestmt:   ELSE ifstmt 
-            | ELSE stmtblock
+elsestmt:    
+            ELSE stmtblock
             | ELSE stmt
-            |  
+            |
             ;
+
+
 %%
 #include "lex.yy.c"
 
@@ -298,9 +346,16 @@ void yyerror(char *s) {
 int main()
 {
     //{ strcpy(ty,$1); insert($2,"Identifier",0,1,para,scope);}
-    yyin=fopen("functions.c","r");
+    yyin=fopen("test3.c","r");
     yyparse();
-
+    if (!fflag && !flag)
+    {
+        printf("Line %d : No functions were defined \n",line-1);
+    }
+    if (strcmp(lastf,"main")!=0 && !flag)
+    {
+        printf("Line %d : main wasn't the last function \n",line-1);
+    }
     if(!flag){
         printf("Parsing Successful\n");
     }
