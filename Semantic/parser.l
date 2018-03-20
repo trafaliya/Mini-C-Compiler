@@ -195,8 +195,10 @@ int search(char a[100])
          if (stable[hashIndex]->nest<=scope)
          {
             strcpy(prevcall,stable[hashIndex]->ty); 
-            if (stable[hashIndex]->isarr==1)
+            if (stable[hashIndex]->isarr==1 || stable[hashIndex]->func==1)
 		flag2=0;
+            else
+		flag2=1;
             return 1;
      	 } 
      }
@@ -244,11 +246,11 @@ int csearch(char a[100])
 void display() {
    int i = 0;
    printf("\nSymbol Table: \n");
-   
+   printf("\nSymbol \t Property \t Type \t Dimension \t IsFunc \t Parameters \t \t Nesting\n");
    for(i = 0; i<10000; i++) {
 	
       if(stable1[i] != NULL && stable1[i]->token!="-1")
-         printf("%s \t %s \t %s \t %d \t %d \t %s \t %d\n",stable1[i]->token,stable1[i]->type,stable1[i]->ty,stable1[i]->arrs,stable1[i]->func,stable1[i]->para,stable1[i]->nest);
+         printf("%s \t %s \t %s \t %d \t \t %d \t \t %s \t \t \t %d\n",stable1[i]->token,stable1[i]->type,stable1[i]->ty,stable1[i]->arrs,stable1[i]->func,stable1[i]->para,stable1[i]->nest);
 
    }
 }
