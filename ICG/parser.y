@@ -26,6 +26,7 @@
     void intostr(int q);
     void unary(); 
     void final();
+    void arrfinal(int x);
     void label();
     void end();
     void cond();
@@ -42,7 +43,6 @@
 	int a;
     }st[100];
     struct funclabel{
-	char a[100];
 	int x;
 	}f[100];
    
@@ -173,7 +173,11 @@ assignment: ID{push($1); } EQ {push("="); } expr {if (!search($1)) printf("Line 
             |ID{push($1); } PEQ{push("="); } expr {if (!search($1)) printf("Line %d : %s not declared \n",line,$1);if ($5!=1) printf ("Line %d : Expression is not of type INT \n",line);final();} 
             |ID{push($1); } MEQ{push("="); } expr {if (!search($1)) printf("Line %d : %s not declared \n",line,$1);if ($5!=1) printf ("Line %d : Expression is not of type INT \n",line);final();} 
             |ID{push($1); } DEQ{push("="); } expr {if (!search($1)) printf("Line %d : %s not declared \n",line,$1);if ($5!=1) printf ("Line %d : Expression is not of type INT \n",line);final();} 
-            |ID{push($1); } MULEQ{push("="); } expr {if (!search($1)) printf("Line %d : %s not declared \n",line,$1);if ($5!=1) printf ("Line %d : Expression is not of type INT \n",line);final();} 
+            |ID{push($1); } MULEQ{push("="); } expr {if (!search($1)) printf("Line %d : %s not declared \n",line,$1);if ($5!=1) printf ("Line %d : Expression is not of type INT \n",line);final();}
+            |ID{push($1); }'['NUM']' EQ{push("="); } expr {
+		                if (!search($1)) printf("Line %d : %s not declared \n",line,$1);
+		        arrfinal($4);
+		        }  
             ;
 
 assignment1: ID EQ expr {
@@ -181,6 +185,7 @@ assignment1: ID EQ expr {
 				printf("Line %d : Redeclaration of identifier \n",line);
                        else
 		                insert($1,"Identifier",0,0,"",scope,"",0,0,0); if ($3!=1) printf ("Line %d : Expression is not of type INT \n",line);} 
+		 
 	     |ID PEQ expr {
 		        if (cdup($1))
 				printf("Line %d : Redeclaration of identifier \n",line);
@@ -208,6 +213,8 @@ assignment1: ID EQ expr {
  
 declaration:type dec1 
             ;
+
+
 
 dec1:       ID        {
 		        if (cdup($1))
@@ -337,9 +344,14 @@ funccall:   ID'('')'{
 				}
                                printf("CALL %s,%d\n",$1,targ);}
             ;
- 
-funcdef:    type ID{printf("\nFUNC BEGIN %s: \n",$2);} '('  paramlist')'{ fflag=1; strcpy(lastf,$2); strcpy(ty,$1); strcpy(futy,$1); if (cdup($2)) printf("Line %d : Redeclaration of identifer \n",line); else insert($2,"Function",0,1,para,scope,pty,count,0,0);  count=0;int i;memset(para, 0, sizeof para); }  stmtblock {printf("FUNC END\n\n"); }
-            ;
+
+
+
+funcdef:    type ID{printf("\nFUNC BEGIN : %s\n",$2);} '('  paramlist')'{ fflag=1; strcpy(lastf,$2); strcpy(ty,$1); strcpy(futy,$1); if (!cdup($2)) insert($2,"Function",0,1,para,scope,pty,count,0,0);  count=0;int i;memset(para, 0, sizeof para); }  stmtblock {printf("FUNC END\n\n"); }
+			
+            
+           
+			;
 
 subroutine:  %empty {label(); }
              ;
@@ -361,8 +373,8 @@ forloop:    FOR  '(' expr1 ';' subroutine expr1 sub1 ';' expr1 ')' {if($6!=1)pri
             | FOR '(' expr1 ';' subroutine expr1 sub1';' expr1 ')' {if($6!=1)printf("Line %d : For expression is not of type INT \n",line-1); }stmtblock {end();}
             ;
  
-ifstmt:     IF '(' expr sub2 ')' stmtblock sub3 elsestmt {if($3!=1)printf("Line %d : If expression is not of type INT \n",line); if (el!=-1) printf("\nLABEL %d: \n",el); el=-1;}
-            | IF '(' expr sub2 ')' stmt sub3 elsestmt {if($3!=1)printf("Line %d : If expression is not of type INT \n",line); if (el!=-1) printf("\nLABEL %d: \n",el); el=-1;}
+ifstmt:     IF '(' expr sub2 ')' stmtblock sub3 elsestmt {if($3!=1)printf("Line %d : If expression is not of type INT \n",line);printf("\nLABEL %d: \n",st[--top1].a); el=-1;}
+            | IF '(' expr sub2 ')' stmt sub3 elsestmt {if($3!=1)printf("Line %d : If expression is not of type INT \n",line); printf("\nLABEL %d: \n",st[--top1].a); el=-1;}
             ;
 
 elsestmt:    
@@ -406,7 +418,7 @@ int main()
     }
     if (strcmp(lastf,"main")!=0 && !flag)
     {
-        printf("Line %d : main wasn't the last function \n",line-1);
+        //printf("Line %d : main wasn't the last function \n",line-1);
     }
     if(!flag){
         printf("\nParsing Successful\n");
