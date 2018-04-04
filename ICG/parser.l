@@ -102,6 +102,19 @@ void final()
 	top=top-3;
 }
 
+void arrfinal(int x)
+{
+	char t[100];
+	strcpy(t,"t");
+	intostr(vc);
+	strcat(t,con);
+	vc++;
+	printf("%s = 4 * %d\n",t,x);
+	printf("%s[%s] %s %s\n",s[top-3].a,t,s[top-2].a,s[top-1].a);
+    top=top-3;
+}
+
+
 void label()
 {
 	printf("\nLabel %d: \n",lc);
@@ -138,13 +151,11 @@ void ifcond()
 	intostr(vc);
 	vc++;
 	strcat(t,con);
-	printf("%s = NOT %s\n",t,s[top-1].a);
-	if (el==-1)
-	{
-		el=lc;
-		lc++;			
-	}	
+	printf("%s = NOT %s\n",t,s[top-1].a);	
 	printf("IF %s GOTO Label %d \n",t,lc);
+	st[top1].a=lc;
+	top1++;
+	lc++;
 	top=top-1;
 	
 }
@@ -152,9 +163,12 @@ void ifcond()
 
 void iflabel()
 {
-	printf("GOTO Label %d \n",el);	
-	printf("\nLabel %d: \n",lc);
-	lc=lc+1;
+	printf("GOTO Label %d \n",lc);	
+	printf("\nLabel %d: \n",st[top1-1].a);
+	top1--;
+	st[top1].a=lc;
+	lc++;
+	top1=top1+1;
 }
 
 
